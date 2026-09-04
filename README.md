@@ -5,9 +5,9 @@ Search for movies/TV series by TMDB ID
 
 For movies
 ```
-https://url/?tmdb=(TMDB ID)
+http(s)://url/?tmdb=(TMDB ID)
 ```
 For TV series
 ```
-https://url/?tmdb=(TMDB ID)&type=tv
+http(s)://url/?tmdb=(TMDB ID)&type=tv
 ```
