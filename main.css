@@ -1,0 +1,602 @@
+/* ===== Base reset for iframe ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+
+/* ===== Player container ===== */
+.vp-player {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* In fullscreen the container should fill the whole screen */
+.vp-player:fullscreen,
+.vp-player:-webkit-full-screen,
+.vp-player:-moz-full-screen,
+.vp-player:-ms-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+}
+
+.vp-video-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 1;
+}
+
+/* ===== Big centered Play button ===== */
+.vp-big-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  width: 72px;
+  height: 72px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, opacity 0.25s;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vp-big-play:hover {
+  background: rgba(0, 0, 0, 0.75);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.vp-big-play svg {
+  margin-left: 4px;
+}
+
+.vp-player.is-playing .vp-big-play {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   Auto-hide for the panels (top and bottom).
+   Panels are visible only when .vp-player has the .controls-visible class
+   (set/removed from JS on cursor movement and a timer) or .is-paused
+   (controls are always shown while paused). No permanent :hover show —
+   that's exactly how "hide over time" / "show on cursor movement" works.
+   ===================================================================== */
+
+/* ===== Bottom control panel (YouTube-style) ===== */
+.vp-control-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  padding: 48px 16px 12px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.vp-player.is-paused .vp-control-panel,
+.vp-player.controls-visible .vp-control-panel {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== Top panel: title + season/episode/voice ===== */
+.vp-top-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 20;
+  display: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: linear-gradient(rgba(0, 0, 0, 0.75), transparent);
+  padding: 14px 16px 36px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.vp-top-panel.is-active {
+  display: flex;
+}
+
+/* Same auto-hide rules as bottom control panel */
+.vp-player.is-paused .vp-top-panel.is-active,
+.vp-player.controls-visible .vp-top-panel.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vp-top-panel__title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+  padding-top: 6px;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.vp-top-panel__selectors {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vp-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vp-select-label {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vp-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: rgba(20, 20, 20, 0.65);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='10' height='10'%3E%3Cpath fill='%23ffffff' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 5px 22px 5px 8px;
+  max-width: 150px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.vp-select:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(30, 30, 30, 0.85);
+}
+
+.vp-select:focus {
+  outline: none;
+  border-color: #fff;
+}
+
+.vp-select option {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* ===== Progress bar ===== */
+.vp-progress-area {
+  padding: 0 4px 8px;
+}
+
+.vp-progress-bar {
+  position: relative;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: height 0.12s ease;
+}
+
+.vp-progress-bar:hover {
+  height: 5px;
+}
+
+.vp-progress-bar__filled {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: #f00;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.vp-progress-bar__handle {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 13px;
+  height: 13px;
+  background: #f00;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.12s ease;
+  pointer-events: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.vp-progress-bar:hover .vp-progress-bar__handle {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ===== Button row ===== */
+.vp-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+}
+
+.vp-controls-left,
+.vp-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.vp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s ease;
+  padding: 0;
+}
+
+.vp-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.vp-btn svg {
+  display: block;
+}
+
+/* ===== Volume (cubic curve slider) ===== */
+.vp-volume {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.vp-volume-slider {
+  width: 48px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.vp-volume-slider__track {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.vp-volume-slider__filled {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0; /* set from JS */
+  max-width: 100%;
+  background: #fff;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.vp-volume-slider__handle {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  margin-top: -6px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  left: 0; /* set from JS */
+}
+
+
+/* ===== Time ===== */
+.vp-time {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 400;
+  margin-left: 8px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.vp-time-sep {
+  opacity: 0.7;
+  margin: 0 2px;
+}
+
+/* ===== States ===== */
+.vp-player.is-playing .js-icon-play {
+  display: none !important;
+}
+.vp-player.is-playing .js-icon-pause {
+  display: block !important;
+}
+.vp-player:not(.is-playing) .js-icon-play {
+  display: block !important;
+}
+.vp-player:not(.is-playing) .js-icon-pause {
+  display: none !important;
+}
+
+.vp-player.is-muted .js-icon-volume {
+  display: none !important;
+}
+.vp-player.is-muted .js-icon-muted {
+  display: block !important;
+}
+.vp-player:not(.is-muted) .js-icon-volume {
+  display: block !important;
+}
+.vp-player:not(.is-muted) .js-icon-muted {
+  display: none !important;
+}
+
+/* ===== Narrow screens ===== */
+@media (max-width: 480px) {
+  .vp-top-panel {
+    padding: 10px 10px 30px;
+  }
+  .vp-top-panel__title {
+    font-size: 13px;
+    max-width: 100%;
+  }
+  .vp-select {
+    font-size: 12px;
+    max-width: 110px;
+    padding: 4px 20px 4px 6px;
+  }
+}
+
+/* Ensure native video fills the container (no extra chrome) */
+.vp-video-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+
+/* Hide any accidental native controls */
+.vp-video-container video::-webkit-media-controls {
+  display: none !important;
+}
+
+/* ===== Settings menu (YouTube-style) ===== */
+.vp-settings-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.vp-settings-btn svg {
+  transition: transform 0.25s ease;
+}
+
+.vp-settings-wrap.is-open .vp-settings-btn svg {
+  transform: rotate(30deg);
+}
+
+.vp-settings-menu {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  right: 0;
+  width: 256px;
+  background: #212121;
+  border-radius: 12px;
+  padding: 8px 0;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  z-index: 40;
+  overflow: hidden;
+  font-family: 'Roboto', Arial, sans-serif;
+  animation: vp-yt-menu-in 0.15s ease-out;
+}
+
+.vp-settings-menu[hidden] {
+  display: none !important;
+}
+
+@keyframes vp-yt-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Main list rows (Playback speed / Quality) */
+.vp-settings-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.vp-settings-row:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vp-settings-row__label {
+  flex: 1;
+  font-weight: 400;
+}
+
+.vp-settings-row__value {
+  color: #aaa;
+  font-size: 12px;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.vp-settings-row__chevron {
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 300;
+  width: 18px;
+  text-align: center;
+}
+
+/* Submenu header with back arrow */
+.vp-settings-back {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 48px;
+  padding: 0 12px 0 4px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 4px;
+  transition: background 0.1s ease;
+}
+
+.vp-settings-back:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.vp-settings-back__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* Option rows (speeds / qualities) */
+.vp-settings-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px 0 0;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 400;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.vp-settings-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vp-settings-option__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.vp-settings-option.is-active .vp-settings-option__check::before {
+  content: "✓";
+  font-weight: 600;
+}
+
+.vp-settings-option.is-active {
+  font-weight: 500;
+}
+
+/* ===== Loading / status overlay ===== */
+.vp-status {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 15;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Roboto', Arial, sans-serif;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 12px 20px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  max-width: 80%;
+  text-align: center;
+}
+
+.vp-status.is-visible {
+  opacity: 1;
+}
