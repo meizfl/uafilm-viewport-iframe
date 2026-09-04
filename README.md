@@ -1,4 +1,4 @@
-**I'm too lazy to write a Readme.**
+**I'm too lazy to write a Readme for this.**
 
 What it can do:
 Search for movies/TV series by TMDB ID
